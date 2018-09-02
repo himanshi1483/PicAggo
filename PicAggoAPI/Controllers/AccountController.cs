@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -13,6 +14,7 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OAuth;
+using Nexmo.Api;
 using PicAggoAPI.Models;
 using PicAggoAPI.Providers;
 using PicAggoAPI.Results;
@@ -25,9 +27,17 @@ namespace PicAggoAPI.Controllers
     {
         private const string LocalLoginProvider = "Local";
         private ApplicationUserManager _userManager;
+        public Client Client { get; set; }
+        private string requestId { get; set; }
 
         public AccountController()
         {
+          Client = new Client(creds: new Nexmo.Api.Request.Credentials("f40d3101", "MgI6GsGyCz80tTNr")
+            {
+
+                ApiKey = "f40d3101",
+                ApiSecret = "MgI6GsGyCz80tTNr"
+            });
         }
 
         public AccountController(ApplicationUserManager userManager,
@@ -50,6 +60,26 @@ namespace PicAggoAPI.Controllers
         }
 
         public ISecureDataFormat<AuthenticationTicket> AccessTokenFormat { get; private set; }
+
+        //Check if user exist
+        [Route("CheckUser")]
+        [AllowAnonymous]
+        public async Task<IHttpActionResult> CheckUser(string phoneNumber)
+        {
+            IdentityUser user = await UserManager.FindByNameAsync(phoneNumber);
+            if (user == null)
+            {
+                RegisterBindingModel model = new RegisterBindingModel();
+                model.PhoneNumber = phoneNumber;
+                var register = await Register(model);
+                return register;
+            }
+            else
+            {
+               // var otpStatus = new HomeController().RequestOTP(phoneNumber);
+                return Ok();
+            }
+        }
 
         // GET api/Account/UserInfo
         [HostAuthentication(DefaultAuthenticationTypes.ExternalBearer)]
@@ -125,7 +155,7 @@ namespace PicAggoAPI.Controllers
 
             IdentityResult result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId(), model.OldPassword,
                 model.NewPassword);
-            
+
             if (!result.Succeeded)
             {
                 return GetErrorResult(result);
@@ -258,9 +288,9 @@ namespace PicAggoAPI.Controllers
             if (hasRegistered)
             {
                 Authentication.SignOut(DefaultAuthenticationTypes.ExternalCookie);
-                
-                 ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(UserManager,
-                    OAuthDefaults.AuthenticationType);
+
+                ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(UserManager,
+                   OAuthDefaults.AuthenticationType);
                 ClaimsIdentity cookieIdentity = await user.GenerateUserIdentityAsync(UserManager,
                     CookieAuthenticationDefaults.AuthenticationType);
 
@@ -327,17 +357,22 @@ namespace PicAggoAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
+         
+            var user = new ApplicationUser() { UserName = model.PhoneNumber, Email = "", PhoneNumber = model.PhoneNumber };
 
-            var user = new ApplicationUser() { UserName = model.Email, Email = model.Email };
-
-            IdentityResult result = await UserManager.CreateAsync(user, model.Password);
+            IdentityResult result =  UserManager.Create(user, "1234");
 
             if (!result.Succeeded)
             {
                 return GetErrorResult(result);
             }
+            else
+            {
+            //   var status = new HomeController().RequestOTP(model.PhoneNumber);
+                return Ok();
+            }
 
-            return Ok();
+           
         }
 
         // POST api/Account/RegisterExternal
@@ -368,7 +403,7 @@ namespace PicAggoAPI.Controllers
             result = await UserManager.AddLoginAsync(user.Id, info.Login);
             if (!result.Succeeded)
             {
-                return GetErrorResult(result); 
+                return GetErrorResult(result);
             }
             return Ok();
         }
