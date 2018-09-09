@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Data.Entity;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
@@ -9,6 +10,8 @@ namespace PicAggoAPI.Models
     // You can add profile data for the user by adding more properties to your ApplicationUser class, please visit https://go.microsoft.com/fwlink/?LinkID=317594 to learn more.
     public class ApplicationUser : IdentityUser
     {
+        public string DefaultStorage { get; set; }
+        public string DeviceToken { get; set; }
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager, string authenticationType)
         {
             // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType
@@ -24,7 +27,15 @@ namespace PicAggoAPI.Models
             : base("DefaultConnection", throwIfV1Schema: false)
         {
         }
-        
+
+        public DbSet<GroupsMaster> GroupsMasters { get; set; }
+        public DbSet<UserGroupMapping> UserGroupMappings { get; set; }
+        public DbSet<Events> Events { get; set; }
+        public DbSet<EventDetails> EventDetails { get; set; }
+        public DbSet<LogMetadata> LogMetadata { get; set; }
+        public DbSet<EventGroupMapping> EventGroupMapping { get; set; }
+
+
         public static ApplicationDbContext Create()
         {
             return new ApplicationDbContext();

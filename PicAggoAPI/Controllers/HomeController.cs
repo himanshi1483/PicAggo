@@ -17,7 +17,6 @@ namespace PicAggoAPI.Controllers
     {
         public Client Client { get; set; }
         private ApplicationUserManager _userManager;
-
         public HomeController()
         {
             Client = new Client(creds: new Nexmo.Api.Request.Credentials("f40d3101", "MgI6GsGyCz80tTNr")
@@ -46,7 +45,10 @@ namespace PicAggoAPI.Controllers
             }
         }
 
-        
+        public ActionResult Index()
+        {
+            return View();
+        }
 
 
         //Send Nexmo Verification Code
@@ -64,21 +66,21 @@ namespace PicAggoAPI.Controllers
 
             Session["requestId"] = start.request_id;
 
-            if (start.status == "0")
-            {
-                return "OTP Sent";
-            }
-            else
-            {
+            //if (start.status == "0")
+            //{
+            //    return "OTP Sent";
+            //}
+            //else
+            //{
                 return start.status;
-            }
+           // }
         }
 
         //Verify Nexmo Verification Code
         //   [HttpPost]
         [AllowAnonymous]
         [Route("VerifyOTP")]
-        public string VerifyOTP(string code)
+        public string VerifyOTP(string code, string deviceToken)
         {
 
             var result = Client.NumberVerify.Check(new NumberVerify.CheckRequest
@@ -91,9 +93,10 @@ namespace PicAggoAPI.Controllers
             if (result.status == "0")
             {
                 var phonuNumber = Session["phoneNumber"].ToString();
-                var user = CheckUserAsync(phonuNumber);
-
-                return user.ToString();
+                
+                var user = CheckUserAsync(phonuNumber, deviceToken);
+              
+                return result.status.ToString();
             }
             else
             {
@@ -101,18 +104,21 @@ namespace PicAggoAPI.Controllers
             }
         }
 
-        public string CheckUserAsync(string phoneNumber)
+        public string CheckUserAsync(string phoneNumber, string deviceToken)
         {
-            IdentityUser user =  UserManager.FindByName(phoneNumber);
+            var user =  UserManager.FindByName(phoneNumber);
             if (user == null)
             {
                 RegisterBindingModel model = new RegisterBindingModel();
                 model.PhoneNumber = phoneNumber;
+                model.DeviceToken = deviceToken;
                 var register = Register(model);
                 return register.ToString();
             }
             else
             {
+                user.DeviceToken = deviceToken;
+                UserManager.Update(user);
                 return "Already Exist";
             }
         }
@@ -124,7 +130,7 @@ namespace PicAggoAPI.Controllers
                 return false;
             }
 
-            var user = new ApplicationUser() { UserName = model.PhoneNumber, Email = "", PhoneNumber = model.PhoneNumber, PhoneNumberConfirmed = true };
+            var user = new ApplicationUser() { UserName = model.PhoneNumber, Email = "", PhoneNumber = model.PhoneNumber, PhoneNumberConfirmed = true, DeviceToken = model.DeviceToken };
 
             IdentityResult result = UserManager.Create(user, "1234");
 
