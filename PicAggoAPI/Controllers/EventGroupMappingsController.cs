@@ -9,6 +9,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using PicAggoAPI.Models;
 
 namespace PicAggoAPI.Controllers
@@ -18,49 +20,103 @@ namespace PicAggoAPI.Controllers
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: api/EventGroupMappings
-        public IQueryable<EventGroupMapping> GetEventGroupMapping()
+        public JObject GetEventGroupMapping()
         {
-            return db.EventGroupMapping;
+            var result1 = new ResponseModel
+            {
+                Message = "Success",
+                Status = HttpStatusCode.OK,
+                Data = db.EventGroupMapping
+
+            };
+            var d1 = JsonConvert.SerializeObject(result1);
+            var s1 = JObject.Parse(d1);
+            return s1;
         }
 
         // GET: api/EventGroupMappings/5
-        [ResponseType(typeof(EventGroupMapping))]
-        public async Task<IHttpActionResult> GetEventGroupMapping(int id)
+      //  [ResponseType(typeof(EventGroupMapping))]
+        public JObject GetEventGroupMapping(int id)
         {
-            EventGroupMapping eventGroupMapping = await db.EventGroupMapping.FindAsync(id);
+            EventGroupMapping eventGroupMapping = db.EventGroupMapping.Find(id);
             if (eventGroupMapping == null)
             {
-                return NotFound();
+                var result = new ResponseModel
+                {
+                    Message = "Not Found",
+                    Status = HttpStatusCode.NotFound,
+                    Data = null
+
+                };
+                var d = JsonConvert.SerializeObject(result);
+                var s = JObject.Parse(d);
+                return s;
             }
 
-            return Ok(eventGroupMapping);
+            var result1 = new ResponseModel
+            {
+                Message = "Success",
+                Status = HttpStatusCode.OK,
+                Data = eventGroupMapping
+
+            };
+            var d1 = JsonConvert.SerializeObject(result1);
+            var s1 = JObject.Parse(d1);
+            return s1;
         }
 
         // PUT: api/EventGroupMappings/5
-        [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> PutEventGroupMapping(int id, EventGroupMapping eventGroupMapping)
+       // [ResponseType(typeof(void))]
+        public JObject PutEventGroupMapping(int id, EventGroupMapping eventGroupMapping)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                var result = new ResponseModel
+                {
+                    Message = "Invalid Request",
+                    Status = HttpStatusCode.BadRequest,
+                    Data = null
+
+                };
+                var d = JsonConvert.SerializeObject(result);
+                var s = JObject.Parse(d);
+                return s;
             }
 
             if (id != eventGroupMapping.Id)
             {
-                return BadRequest();
+                var result = new ResponseModel
+                {
+                    Message = "Invalid Request",
+                    Status = HttpStatusCode.BadRequest,
+                    Data = null
+
+                };
+                var d = JsonConvert.SerializeObject(result);
+                var s = JObject.Parse(d);
+                return s;
             }
 
             db.Entry(eventGroupMapping).State = EntityState.Modified;
 
             try
             {
-                await db.SaveChangesAsync();
+                db.SaveChanges();
             }
             catch (DbUpdateConcurrencyException)
             {
                 if (!EventGroupMappingExists(id))
                 {
-                    return NotFound();
+                    var result1 = new ResponseModel
+                    {
+                        Message = "Not Found",
+                        Status = HttpStatusCode.NotFound,
+                        Data = null
+
+                    };
+                    var d1 = JsonConvert.SerializeObject(result1);
+                    var s1 = JObject.Parse(d1);
+                    return s1;
                 }
                 else
                 {
@@ -68,38 +124,83 @@ namespace PicAggoAPI.Controllers
                 }
             }
 
-            return StatusCode(HttpStatusCode.NoContent);
+            var result2 = new ResponseModel
+            {
+                Message = "Success",
+                Status = HttpStatusCode.OK,
+                Data = eventGroupMapping
+
+            };
+            var d2 = JsonConvert.SerializeObject(result2);
+            var s2 = JObject.Parse(d2);
+            return s2;
         }
 
         // POST: api/EventGroupMappings
-        [ResponseType(typeof(EventGroupMapping))]
-        public async Task<IHttpActionResult> PostEventGroupMapping(EventGroupMapping eventGroupMapping)
+      //  [ResponseType(typeof(EventGroupMapping))]
+        public JObject PostEventGroupMapping(EventGroupMapping eventGroupMapping)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                var result = new ResponseModel
+                {
+                    Message = "Invalid Request",
+                    Status = HttpStatusCode.BadRequest,
+                    Data = null
+
+                };
+                var d = JsonConvert.SerializeObject(result);
+                var s = JObject.Parse(d);
+                return s;
             }
 
             db.EventGroupMapping.Add(eventGroupMapping);
-            await db.SaveChangesAsync();
+            db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = eventGroupMapping.Id }, eventGroupMapping);
+            var result1 = new ResponseModel
+            {
+                Message = "Success",
+                Status = HttpStatusCode.OK,
+                Data = eventGroupMapping
+
+            };
+            var d1 = JsonConvert.SerializeObject(result1);
+            var s1 = JObject.Parse(d1);
+            return s1;
         }
 
         // DELETE: api/EventGroupMappings/5
-        [ResponseType(typeof(EventGroupMapping))]
-        public async Task<IHttpActionResult> DeleteEventGroupMapping(int id)
+        //[ResponseType(typeof(EventGroupMapping))]
+        public JObject DeleteEventGroupMapping(int id)
         {
-            EventGroupMapping eventGroupMapping = await db.EventGroupMapping.FindAsync(id);
+            EventGroupMapping eventGroupMapping = db.EventGroupMapping.Find(id);
             if (eventGroupMapping == null)
             {
-                return NotFound();
+                var result = new ResponseModel
+                {
+                    Message = "Not Found",
+                    Status = HttpStatusCode.NotFound,
+                    Data = null
+
+                };
+                var d = JsonConvert.SerializeObject(result);
+                var s = JObject.Parse(d);
+                return s;
             }
 
             db.EventGroupMapping.Remove(eventGroupMapping);
-            await db.SaveChangesAsync();
+            db.SaveChanges();
 
-            return Ok(eventGroupMapping);
+            var result1 = new ResponseModel
+            {
+                Message = "Success",
+                Status = HttpStatusCode.OK,
+                Data = eventGroupMapping
+
+            };
+            var d1 = JsonConvert.SerializeObject(result1);
+            var s1 = JObject.Parse(d1);
+            return s1;
         }
 
         protected override void Dispose(bool disposing)

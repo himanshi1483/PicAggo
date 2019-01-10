@@ -6,7 +6,7 @@ using System.Web;
 
 namespace PicAggoAPI.Models
 {
-    public class GroupsMaster
+    public class GroupMaster
     {
         [Key]
         public int Id { get; set; }

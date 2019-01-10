@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
+using PicAggoAPI.Providers;
 
 namespace PicAggoAPI.Models
 {
@@ -11,6 +12,8 @@ namespace PicAggoAPI.Models
     public class ApplicationUser : IdentityUser
     {
         public string DefaultStorage { get; set; }
+        public string AppParentFolderId { get; set; }
+                                           //  public string RefreshToken { get; set; }
         public string DeviceToken { get; set; }
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager, string authenticationType)
         {
@@ -27,15 +30,15 @@ namespace PicAggoAPI.Models
             : base("DefaultConnection", throwIfV1Schema: false)
         {
         }
-
-        public DbSet<GroupsMaster> GroupsMasters { get; set; }
+        public DbSet<StoredResponse> StoredResponse { get; set; }
+        public DbSet<GroupMaster> GroupsMasters { get; set; }
         public DbSet<UserGroupMapping> UserGroupMappings { get; set; }
         public DbSet<Events> Events { get; set; }
         public DbSet<EventDetails> EventDetails { get; set; }
         public DbSet<LogMetadata> LogMetadata { get; set; }
         public DbSet<EventGroupMapping> EventGroupMapping { get; set; }
-
-
+        public DbSet<InvitedUsers> InvitedUsers { get; set; }
+      //  public DbSet<GoogleUserCredential> GoogleUserCredential { get; set; }
         public static ApplicationDbContext Create()
         {
             return new ApplicationDbContext();

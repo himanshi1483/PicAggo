@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Net;
 using System.Web;
 
 namespace PicAggoAPI.Models
@@ -17,5 +18,13 @@ namespace PicAggoAPI.Models
         public string ResponseContentType { get; set; }
         public string ResponseStatusCode { get; set; }
         public DateTime? ResponseTimestamp { get; set; }
+    }
+
+    public class ResponseModel
+    {
+        public string Message { set; get; }
+        public HttpStatusCode Status { set; get; }
+        public object Data { set; get; }
+        public string  AccessToken { get; set; }
     }
 }

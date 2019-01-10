@@ -61,8 +61,8 @@ namespace PicAggoAPI
 
             //app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
             //{
-            //    ClientId = "",
-            //    ClientSecret = ""
+            //    ClientId = "483997741726-s7thbe7t300jk14ivekc6m55h8r5sqs4.apps.googleusercontent.com",
+            //    ClientSecret = "Vy3kdmCC9YaPlIwgW4QqCdmq"
             //});
         }
     }

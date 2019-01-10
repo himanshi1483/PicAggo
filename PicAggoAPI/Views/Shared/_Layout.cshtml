@@ -6,6 +6,44 @@
     <title>@ViewBag.Title</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    @*<script src="https://sdk.pushy.me/web/1.0.2/pushy-sdk.js"></script>
+        <script>
+            // Register device for push notifications
+            Pushy.register({ appId: '5c0620911082a1bb6908dce5' }).then(function (deviceToken) {
+                // Print device token to console
+                console.log('Pushy device token: ' + deviceToken);
+                alert(deviceToken);
+                // Send the token to your backend server via an HTTP GET request
+                //fetch('https://picaggo.azurewebsites.net/register/device?token=' + deviceToken);
+
+                // Succeeded, optionally do something to alert the user
+            }).catch(function (err) {
+                // Handle registration errors
+                console.error(err);
+            });
+        </script>*@<!-- Firebase App is always required and must be first -->
+    <script src="https://www.gstatic.com/firebasejs/5.6.0/firebase-app.js"></script>
+
+    <!-- Add additional services that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/5.6.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.6.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.6.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.6.0/firebase-messaging.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.6.0/firebase-functions.js"></script>
+
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyBS5CNrhBKkRH8JOycF0izDxSbfRogvj6E",
+            authDomain: "picaggo-drive.firebaseapp.com",
+            databaseURL: "https://picaggo-drive.firebaseio.com",
+            projectId: "picaggo-drive",
+            storageBucket: "picaggo-drive.appspot.com",
+            messagingSenderId: "483997741726"
+        };
+        firebase.initializeApp(config);
+    </script>
+ 
 </head>
 <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -33,7 +71,6 @@
             <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
         </footer>
     </div>
-
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)

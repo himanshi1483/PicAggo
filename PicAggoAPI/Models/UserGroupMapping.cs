@@ -10,8 +10,9 @@ namespace PicAggoAPI.Models
     {
         [Key]
         public int Id { get; set; }
-        public string UserId { get; set; }
+        public string UserName { get; set; }
         public int GroupId { get; set; }
+        public bool IsInviteAccepted { get; set; }
         //public virtual ApplicationUser ApplicationUser { get; set; }
         //public virtual GroupsMaster GroupsMaster { get; set; }
     }

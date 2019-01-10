@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Web;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PicAggoAPI.Models
 {
@@ -15,5 +13,8 @@ namespace PicAggoAPI.Models
         public DateTime ActivityTime { get; set; }
         public string ActivityBy { get; set; }
         public int PicturesUploaded { get; set; }
+        [NotMapped]
+        public string AccessToken { get; set; }
+
     }
 }

@@ -9,6 +9,10 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.Owin;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using PicAggoAPI.Models;
 
 namespace PicAggoAPI.Controllers
@@ -16,51 +20,154 @@ namespace PicAggoAPI.Controllers
     public class GroupsMastersController : ApiController
     {
         private ApplicationDbContext db = new ApplicationDbContext();
-
+        private ApplicationUserManager _userManager;
         // GET: api/GroupsMasters
-        public IQueryable<GroupsMaster> GetGroupsMasters()
+        public JObject GetGroupsMasters()
         {
-            return db.GroupsMasters;
+            var result = new ResponseModel
+            {
+                Message = "Success",
+                Status = HttpStatusCode.OK,
+                Data = db.GroupsMasters
+
+            };
+            var d = JsonConvert.SerializeObject(result);
+            var s = JObject.Parse(d);
+            return s;
         }
 
-        // GET: api/GroupsMasters/5
-        [ResponseType(typeof(GroupsMaster))]
-        public async Task<IHttpActionResult> GetGroupsMaster(int id)
+        public ApplicationUserManager UserManager
         {
-            GroupsMaster groupsMaster = await db.GroupsMasters.FindAsync(id);
+            get
+            {
+                return _userManager ?? Request.GetOwinContext().GetUserManager<ApplicationUserManager>();
+            }
+            private set
+            {
+                _userManager = value;
+            }
+        }
+
+        public GroupsMastersController()
+        {
+
+        }
+
+        public GroupsMastersController(ApplicationUserManager userManager)
+        {
+            UserManager = userManager;
+        }
+        // GET: api/GroupsMasters/5
+        //  [ResponseType(typeof(GroupMaster))]
+        public JObject GetGroupsMaster(int id)
+        {
+            GroupMaster groupsMaster = db.GroupsMasters.Find(id);
             if (groupsMaster == null)
             {
-                return NotFound();
+                var result1 = new ResponseModel
+                {
+                    Message = "Not Found",
+                    Status = HttpStatusCode.NotFound,
+                    Data = null
+
+                };
+                var d1 = JsonConvert.SerializeObject(result1);
+                var s1 = JObject.Parse(d1);
+                return s1;
             }
 
-            return Ok(groupsMaster);
+            var result = new ResponseModel
+            {
+                Message = "Success",
+                Status = HttpStatusCode.OK,
+                Data = groupsMaster
+
+            };
+            var d = JsonConvert.SerializeObject(result);
+            var s = JObject.Parse(d);
+            return s;
+        }
+
+
+        // GET: api/GroupsMasters/5
+       // [ResponseType(typeof(GroupMaster))]
+        [Authorize]
+        [Route("api/groupsmasters/getGroupsByUser")]
+        public JObject GetGroupsByUser()
+        {
+            var id = User.Identity.GetUserId();
+            string userId = db.Users.Where(x => x.Id == id).Select(x => x.Id).FirstOrDefault();
+            List<GroupMaster> groupsMaster = db.GroupsMasters.Where(x => x.CreatedBy == userId).ToList();
+            if (groupsMaster == null)
+            {
+                var result1 = new ResponseModel
+                {
+                    Message = "Not Found",
+                    Status = HttpStatusCode.NotFound,
+                    Data = null
+
+                };
+                var d1 = JsonConvert.SerializeObject(result1);
+                var s1 = JObject.Parse(d1);
+                return s1;
+            }
+
+            var result = new ResponseModel
+            {
+                Message = "Success",
+                Status = HttpStatusCode.OK,
+                Data = groupsMaster
+
+            };
+            var d = JsonConvert.SerializeObject(result);
+            var s = JObject.Parse(d);
+            return s;
         }
 
         // PUT: api/GroupsMasters/5
-        [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> PutGroupsMaster(int id, GroupsMaster groupsMaster)
+        //[ResponseType(typeof(void))]
+        public JObject PutGroupsMaster(int id, GroupMaster groupsMaster)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
+            //if (!ModelState.IsValid)
+            //{
+            //    return BadRequest(ModelState);
+            //}
+           // groupsMaster.CreatedAt = DateTime.Now;
+           // groupsMaster.CreatedBy = (User.Identity.Name != null) ? User.Identity.Name : "admin";
             if (id != groupsMaster.Id)
             {
-                return BadRequest();
+                var result1 = new ResponseModel
+                {
+                    Message = "Invalid Request",
+                    Status = HttpStatusCode.BadRequest,
+                    Data = null
+
+                };
+                var d1 = JsonConvert.SerializeObject(result1);
+                var s1 = JObject.Parse(d1);
+                return s1;
             }
 
             db.Entry(groupsMaster).State = EntityState.Modified;
 
             try
             {
-                await db.SaveChangesAsync();
+                db.SaveChanges();
             }
             catch (DbUpdateConcurrencyException)
             {
                 if (!GroupsMasterExists(id))
                 {
-                    return NotFound();
+                    var result1 = new ResponseModel
+                    {
+                        Message = "Not Found",
+                        Status = HttpStatusCode.NotFound,
+                        Data = null
+
+                    };
+                    var d1 = JsonConvert.SerializeObject(result1);
+                    var s1 = JObject.Parse(d1);
+                    return s1;
                 }
                 else
                 {
@@ -68,38 +175,76 @@ namespace PicAggoAPI.Controllers
                 }
             }
 
-            return StatusCode(HttpStatusCode.NoContent);
+            var result = new ResponseModel
+            {
+                Message = "Success",
+                Status = HttpStatusCode.OK,
+                Data = null
+
+            };
+            var d = JsonConvert.SerializeObject(result);
+            var s = JObject.Parse(d);
+            return s;
         }
 
         // POST: api/GroupsMasters
-        [ResponseType(typeof(GroupsMaster))]
-        public async Task<IHttpActionResult> PostGroupsMaster(GroupsMaster groupsMaster)
+       // [ResponseType(typeof(GroupMaster))]
+        public JObject PostGroupsMaster(GroupMaster groupsMaster)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
+            //if (!ModelState.IsValid)
+            //{
+            //    return BadRequest(ModelState);
+            //}
+            var id = User.Identity.GetUserId();
+            groupsMaster.CreatedAt = DateTime.Now;
+            groupsMaster.CreatedBy = (id != null) ? id : "admin";
             db.GroupsMasters.Add(groupsMaster);
-            await db.SaveChangesAsync();
+            db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = groupsMaster.Id }, groupsMaster);
+            var result = new ResponseModel
+            {
+                Message = "Success",
+                Status = HttpStatusCode.OK,
+                Data = groupsMaster
+
+            };
+            var d = JsonConvert.SerializeObject(result);
+            var s = JObject.Parse(d);
+            return s;
         }
 
         // DELETE: api/GroupsMasters/5
-        [ResponseType(typeof(GroupsMaster))]
-        public async Task<IHttpActionResult> DeleteGroupsMaster(int id)
+        //[ResponseType(typeof(GroupMaster))]
+        public JObject DeleteGroupsMaster(int id)
         {
-            GroupsMaster groupsMaster = await db.GroupsMasters.FindAsync(id);
+            GroupMaster groupsMaster = db.GroupsMasters.Find(id);
             if (groupsMaster == null)
             {
-                return NotFound();
+                var result1 = new ResponseModel
+                {
+                    Message = "Not Found",
+                    Status = HttpStatusCode.NotFound,
+                    Data = null
+
+                };
+                var d1 = JsonConvert.SerializeObject(result1);
+                var s1 = JObject.Parse(d1);
+                return s1;
             }
 
             db.GroupsMasters.Remove(groupsMaster);
-            await db.SaveChangesAsync();
+            db.SaveChanges();
 
-            return Ok(groupsMaster);
+            var result = new ResponseModel
+            {
+                Message = "Success",
+                Status = HttpStatusCode.OK,
+                Data = groupsMaster
+
+            };
+            var d = JsonConvert.SerializeObject(result);
+            var s = JObject.Parse(d);
+            return s;
         }
 
         protected override void Dispose(bool disposing)

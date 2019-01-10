@@ -33,7 +33,7 @@ namespace PicAggoAPI.App_Start
         {
             logMetadata.ResponseStatusCode = response.StatusCode.ToString();
             logMetadata.ResponseTimestamp = DateTime.Now;
-            logMetadata.ResponseContentType = response.Content.Headers.ContentType.MediaType;
+          //  logMetadata.ResponseContentType = response.Content.Headers.ContentType.MediaType;
             return logMetadata;
         }
         private async Task<bool> SendToLog(LogMetadata logMetadata)
@@ -44,4 +44,7 @@ namespace PicAggoAPI.App_Start
             return true;
         }
     }
+
+
+
 }

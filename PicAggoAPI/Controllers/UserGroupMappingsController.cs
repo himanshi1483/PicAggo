@@ -9,6 +9,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using PicAggoAPI.Models;
 
 namespace PicAggoAPI.Controllers
@@ -18,49 +20,104 @@ namespace PicAggoAPI.Controllers
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: api/UserGroupMappings
-        public IQueryable<UserGroupMapping> GetUserGroupMappings()
+        public JObject GetUserGroupMappings()
         {
-            return db.UserGroupMappings;
+
+            var result1 = new ResponseModel
+            {
+                Message = "Success",
+                Status = HttpStatusCode.OK,
+                Data = db.UserGroupMappings
+
+            };
+            var d1 = JsonConvert.SerializeObject(result1);
+            var s1 = JObject.Parse(d1);
+            return s1;
         }
 
         // GET: api/UserGroupMappings/5
-        [ResponseType(typeof(UserGroupMapping))]
-        public async Task<IHttpActionResult> GetUserGroupMapping(int id)
+        //[ResponseType(typeof(UserGroupMapping))]
+        public JObject GetUserGroupMapping(int id)
         {
-            UserGroupMapping userGroupMapping = await db.UserGroupMappings.FindAsync(id);
+            UserGroupMapping userGroupMapping = db.UserGroupMappings.Find(id);
             if (userGroupMapping == null)
             {
-                return NotFound();
+                var result1 = new ResponseModel
+                {
+                    Message = "Not found",
+                    Status = HttpStatusCode.NotFound,
+                    Data = null
+
+                };
+                var d1 = JsonConvert.SerializeObject(result1);
+                var s1 = JObject.Parse(d1);
+                return s1;
             }
 
-            return Ok(userGroupMapping);
+            var result = new ResponseModel
+            {
+                Message = "Success",
+                Status = HttpStatusCode.OK,
+                Data = userGroupMapping
+
+            };
+            var d = JsonConvert.SerializeObject(result);
+            var s = JObject.Parse(d);
+            return s;
         }
 
         // PUT: api/UserGroupMappings/5
-        [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> PutUserGroupMapping(int id, UserGroupMapping userGroupMapping)
+       // [ResponseType(typeof(void))]
+        public JObject PutUserGroupMapping(int id, UserGroupMapping userGroupMapping)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                var result1 = new ResponseModel
+                {
+                    Message = "Invalid Request",
+                    Status = HttpStatusCode.BadRequest,
+                    Data = null
+
+                };
+                var d1 = JsonConvert.SerializeObject(result1);
+                var s1 = JObject.Parse(d1);
+                return s1;
             }
 
             if (id != userGroupMapping.Id)
             {
-                return BadRequest();
+                var result1 = new ResponseModel
+                {
+                    Message = "Invalid Request",
+                    Status = HttpStatusCode.BadRequest,
+                    Data = null
+
+                };
+                var d1 = JsonConvert.SerializeObject(result1);
+                var s1 = JObject.Parse(d1);
+                return s1;
             }
 
             db.Entry(userGroupMapping).State = EntityState.Modified;
 
             try
             {
-                await db.SaveChangesAsync();
+                db.SaveChanges();
             }
             catch (DbUpdateConcurrencyException)
             {
                 if (!UserGroupMappingExists(id))
                 {
-                    return NotFound();
+                    var result1 = new ResponseModel
+                    {
+                        Message = "Not Found",
+                        Status = HttpStatusCode.NotFound,
+                        Data = null
+
+                    };
+                    var d1 = JsonConvert.SerializeObject(result1);
+                    var s1 = JObject.Parse(d1);
+                    return s1;
                 }
                 else
                 {
@@ -68,38 +125,87 @@ namespace PicAggoAPI.Controllers
                 }
             }
 
-            return StatusCode(HttpStatusCode.NoContent);
+            var result = new ResponseModel
+            {
+                Message = "Success",
+                Status = HttpStatusCode.OK,
+                Data = null
+
+            };
+            var d = JsonConvert.SerializeObject(result);
+            var s = JObject.Parse(d);
+            return s;
         }
 
         // POST: api/UserGroupMappings
-        [ResponseType(typeof(UserGroupMapping))]
-        public async Task<IHttpActionResult> PostUserGroupMapping(UserGroupMapping userGroupMapping)
+       // [ResponseType(typeof(List<UserGroupMapping>))]
+        public JObject PostUserGroupMapping(List<UserGroupMapping> userGroupList)
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                var result1 = new ResponseModel
+                {
+                    Message = "Not Found",
+                    Status = HttpStatusCode.NotFound,
+                    Data = null
+
+                };
+                var d1 = JsonConvert.SerializeObject(result1);
+                var s1 = JObject.Parse(d1);
+                return s1;
             }
 
-            db.UserGroupMappings.Add(userGroupMapping);
-            await db.SaveChangesAsync();
+            foreach (var item in userGroupList)
+            {
+                db.UserGroupMappings.Add(item);
+            }
+          //  db.UserGroupMappings.Add(userGroupMapping);
+            db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = userGroupMapping.Id }, userGroupMapping);
+            var result = new ResponseModel
+            {
+                Message = "Success",
+                Status = HttpStatusCode.OK,
+                Data = userGroupList
+
+            };
+            var d = JsonConvert.SerializeObject(result);
+            var s = JObject.Parse(d);
+            return s;
         }
 
         // DELETE: api/UserGroupMappings/5
-        [ResponseType(typeof(UserGroupMapping))]
-        public async Task<IHttpActionResult> DeleteUserGroupMapping(int id)
+       // [ResponseType(typeof(UserGroupMapping))]
+        public JObject DeleteUserGroupMapping(int id)
         {
-            UserGroupMapping userGroupMapping = await db.UserGroupMappings.FindAsync(id);
+            UserGroupMapping userGroupMapping =  db.UserGroupMappings.Find(id);
             if (userGroupMapping == null)
             {
-                return NotFound();
+                var result1 = new ResponseModel
+                {
+                    Message = "Not Found",
+                    Status = HttpStatusCode.NotFound,
+                    Data = null
+
+                };
+                var d1 = JsonConvert.SerializeObject(result1);
+                var s1 = JObject.Parse(d1);
+                return s1;
             }
 
             db.UserGroupMappings.Remove(userGroupMapping);
-            await db.SaveChangesAsync();
+            db.SaveChanges();
 
-            return Ok(userGroupMapping);
+            var result = new ResponseModel
+            {
+                Message = "Success",
+                Status = HttpStatusCode.OK,
+                Data = userGroupMapping
+
+            };
+            var d = JsonConvert.SerializeObject(result);
+            var s = JObject.Parse(d);
+            return s;
         }
 
         protected override void Dispose(bool disposing)

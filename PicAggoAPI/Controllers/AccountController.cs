@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.ModelBinding;
+using Google.Apis.Drive.v3;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
@@ -29,10 +30,10 @@ namespace PicAggoAPI.Controllers
         private ApplicationUserManager _userManager;
         public Client Client { get; set; }
         private string requestId { get; set; }
-
+        private readonly DriveService _service;
         public AccountController()
         {
-          Client = new Client(creds: new Nexmo.Api.Request.Credentials("f40d3101", "MgI6GsGyCz80tTNr")
+            Client = new Client(creds: new Nexmo.Api.Request.Credentials("f40d3101", "MgI6GsGyCz80tTNr")
             {
 
                 ApiKey = "f40d3101",
@@ -61,6 +62,8 @@ namespace PicAggoAPI.Controllers
 
         public ISecureDataFormat<AuthenticationTicket> AccessTokenFormat { get; private set; }
 
+
+
         //Check if user exist
         [Route("CheckUser")]
         [AllowAnonymous]
@@ -76,7 +79,7 @@ namespace PicAggoAPI.Controllers
             }
             else
             {
-               // var otpStatus = new HomeController().RequestOTP(phoneNumber);
+                // var otpStatus = new HomeController().RequestOTP(phoneNumber);
                 return Ok();
             }
         }
@@ -357,10 +360,10 @@ namespace PicAggoAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-         
+
             var user = new ApplicationUser() { UserName = model.PhoneNumber, Email = "", PhoneNumber = model.PhoneNumber };
 
-            IdentityResult result =  UserManager.Create(user, "1234");
+            IdentityResult result = UserManager.Create(user, "1234");
 
             if (!result.Succeeded)
             {
@@ -368,11 +371,11 @@ namespace PicAggoAPI.Controllers
             }
             else
             {
-            //   var status = new HomeController().RequestOTP(model.PhoneNumber);
+                //   var status = new HomeController().RequestOTP(model.PhoneNumber);
                 return Ok();
             }
 
-           
+
         }
 
         // POST api/Account/RegisterExternal
@@ -418,6 +421,17 @@ namespace PicAggoAPI.Controllers
 
             base.Dispose(disposing);
         }
+
+
+        #region StorageConfiguration
+
+        public  IHttpActionResult AddStorageLocation(string userId)
+        {
+
+            var _storage = GoogleDriveService.createDirectory(_service, "PicAggo", "AppFolder", string.Empty);
+            return Ok();
+        }
+        #endregion
 
         #region Helpers
 
